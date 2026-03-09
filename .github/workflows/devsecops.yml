@@ -1,0 +1,54 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install bandit semgrep detect-secrets pip-audit
+        pip install -r app/requirements.txt
+
+    - name: Run Bandit (SAST)
+      run: |
+        bandit -r app/ -f txt -o reports/bandit_report.txt || true
+        cat reports/bandit_report.txt
+
+    - name: Run pip-audit (Dependency Check)
+      run: |
+        pip-audit -r app/requirements.txt --skip-editable 2>&1 | tee reports/pip_audit_report.txt || true
+
+    - name: Run Semgrep (Advanced SAST)
+      run: |
+        semgrep --config=auto app/ --output reports/semgrep_report.txt --text || true
+
+    - name: Run detect-secrets
+      run: |
+        detect-secrets scan --all-files --exclude-files 'venv/.*' > reports/secrets_report.json || true
+
+    - name: Run Tests
+      run: |
+        pip install pytest pytest-cov
+        pytest tests/test_app.py -v --tb=short
+
+    - name: Upload Reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: reports/
