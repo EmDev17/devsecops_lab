@@ -24,6 +24,9 @@ jobs:
         pip install bandit semgrep detect-secrets pip-audit
         pip install -r app/requirements.txt
 
+    - name: Create reports directory
+      run: mkdir -p reports
+
     - name: Run Bandit (SAST)
       run: |
         bandit -r app/ -f txt -o reports/bandit_report.txt || true
