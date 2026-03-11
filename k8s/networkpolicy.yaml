@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: devsecops-lab-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: devsecops-lab
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 5000
+  egress:
+  - ports:
+    - protocol: TCP
+      port: 5432
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
