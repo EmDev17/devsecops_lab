@@ -14,6 +14,8 @@ spec:
       labels:
         app: devsecops-lab
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
       - name: devsecops-lab
         image: devsecops-lab:vulnerable
@@ -26,11 +28,10 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: secret-key
-        # Fixed: No hardcoded secrets in env vars
         securityContext:
-          # Fixed: Run as non-root user
           runAsUser: 1000
           runAsGroup: 1000
+          runAsNonRoot: true
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         resources:

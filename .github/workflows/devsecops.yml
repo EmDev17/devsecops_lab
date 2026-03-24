@@ -34,9 +34,9 @@ jobs:
         run: pip-audit -r app/requirements.txt
 
       - name: Run Semgrep (Hard Gate)
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: auto
+        run: |
+          pip install semgrep==1.153.1
+          semgrep --config=auto app/ k8s/ --error
 
       - name: Run detect-secrets (Hard Gate)
         run: |
