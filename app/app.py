@@ -14,6 +14,18 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(32))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
 db = SQLAlchemy(app)
 
+# Fixed: Security headers middleware
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+    return response
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
