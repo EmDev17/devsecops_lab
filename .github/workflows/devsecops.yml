@@ -44,6 +44,8 @@ jobs:
             --exclude-files 'venv/.*' \
             --exclude-files 'reports/.*' \
             --exclude-files '.pytest_cache/.*' \
+            --exclude-files '.*\.git/.*' \
+            --exclude-files '.*\.egg-info/.*' \
             > reports/secrets_report.json
           python -c "
           import json
@@ -52,7 +54,9 @@ jobs:
           results = data.get('results', {})
           non_env = {k: v for k, v in results.items() if k != '.env'}
           if non_env:
-              print('FAILED: Secrets found in code!')
+              print('FAILED: Secrets found in these files:')
+              for f in non_env:
+                  print(f'  - {f}')
               exit(1)
           print('detect-secrets passed!')
           "
